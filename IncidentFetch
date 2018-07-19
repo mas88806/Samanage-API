@@ -1,0 +1,42 @@
+//get total pages
+request(options, function (error, response, body) {
+    if (error) throw new Error(error);
+    responseHeaders = response.headers;
+    totalPages = responseHeaders['x-total-pages'];
+
+    //use total pages and loop through
+    for (var i = 1; i <= totalPages; i++) {
+        
+        var optionsTwo = {
+            method: 'GET',
+            url: 'https://api.samanage.com/incidents.json',
+            qs: { per_page: '100', page: i },
+            headers:
+                {
+                    'Postman-Token': '2e75d9fe-4228-4c6f-a2f3-86fdc51a1bcc',
+                    'Cache-Control': 'no-cache',
+                    'Content-Type': 'application/json',
+                    Accept: 'application/vnd.samanage.v2.1+json',
+                    'X-Samanage-Authorization': 'Bearer bWF4LnN0cmF1c3NAY29ydGxhbmRwYXJ0bmVycy5jb20=:eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJ1c2VyX2lkIjozMTY5MjUzLCJnZW5lcmF0ZWRfYXQiOiIyMDE4LTA2LTIxIDIxOjAyOjUyIn0.xC2qmlFXYLhtOAZIyMvdgiTR7zWkECa1-RBVqYb5i-wmod-oFspf1B-HBAPS0_JZiwT5AFrL67Hejw-iH8jwfw'
+                }
+        };
+
+        request(optionsTwo, function (error, response, body) {
+            if (error) throw new Error(error);
+            bodyObj = JSON.parse(body);
+            master = master.concat(bodyObj);
+
+            //if(i == 2){
+                //console.log(master.length%100);
+                //set file
+                const json2csvParser = new Json2csvParser({ fields });
+                const csv = json2csvParser.parse(master);
+                //write to file
+                fs.writeFile('Incidents.csv', csv, 'utf8', (err) => {
+                    if (err) console.log('File not saved');
+                    else console.log('Page number ' + (master.length/100) + ' was written!')
+                });
+            //}
+        });
+    }
+});
